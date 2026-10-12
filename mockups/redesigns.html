@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel Redesigns</title>
+<style>
+  /* ============ page chrome (not part of the plugin) ============ */
+  :root { --page: #161616; --page-txt: #d6d6d6; --page-dim: #8a8a8a; }
+  html, body { margin: 0; background: var(--page); color: var(--page-txt); font-family: -apple-system, "Segoe UI", sans-serif; }
+  .page { max-width: 1000px; margin: 0 auto; padding: 28px 16px 60px; }
+  .page h1 { font-size: 22px; margin: 0 0 6px; }
+  .page .intro { color: var(--page-dim); font-size: 13px; line-height: 1.55; margin: 0 0 8px; max-width: 720px; }
+  .jump { display: flex; flex-wrap: wrap; margin: 14px 0 6px; }
+  .jump a { color: var(--page-txt); text-decoration: none; font-size: 12px; font-weight: 600; padding: 6px 12px; border: 1px solid #333; border-radius: 14px; margin: 0 8px 8px 0; }
+  .jump a:hover { border-color: #666; }
+  .design { margin-top: 44px; }
+  .design h2 { font-size: 17px; margin: 0 0 4px; }
+  .design h2 span { color: var(--page-dim); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  .design .what { color: var(--page-dim); font-size: 13px; line-height: 1.55; margin: 0 0 14px; max-width: 760px; }
+  .row { display: flex; flex-wrap: wrap; align-items: flex-start; }
+  .shot { margin: 0 18px 18px 0; }
+  .shot .cap { font-size: 11px; color: var(--page-dim); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .frame { width: 284px; border: 1px solid #2c2c2c; border-radius: 6px; overflow: hidden; }
+  .frame .psbar { height: 22px; background: #262626; border-bottom: 1px solid #1d1d1d; display: flex; align-items: center; padding: 0 8px; font-size: 11px; color: #aaa; }
+  .frame .psbar b { color: #ddd; font-weight: 600; }
+  .note { color: var(--page-dim); font-size: 12px; margin-top: 30px; line-height: 1.6; border-top: 1px solid #2a2a2a; padding-top: 16px; max-width: 760px; }
+  .note code { color: #cfcfcf; }
+  @media (max-width: 640px) { .shot { margin-right: 0; } .frame { width: calc(100vw - 34px); max-width: 284px; } }
+
+  /* ============ shared panel basics (all UXP-safe: flex + margins, exact radii, flat colours) ============ */
+  .p { font-size: 11px; line-height: 1.35; user-select: none; }
+  .p * { box-sizing: border-box; }
+  .p .fx { display: flex; align-items: center; }
+  .p .grow { flex: 1; min-width: 0; }
+  .p .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p .mono { font-family: "SF Mono", Consolas, monospace; }
+
+  /* ================= A · NATIVE ================= */
+  .A { background: #323232; color: #e0e0e0; padding: 0 12px 14px; }
+  .A .tabs { display: flex; border-bottom: 1px solid #454545; margin: 0 -12px 0; padding: 0 12px; }
+  .A .tab { padding: 10px 0 8px; margin-right: 18px; color: #9a9a9a; font-weight: 600; border-bottom: 2px solid transparent; }
+  .A .tab.on { color: #fff; border-bottom-color: #378ef0; }
+  .A .tab .dot { display: inline-block; width: 6px; height: 6px; border-radius: 3px; background: #2d9d78; margin-right: 5px; vertical-align: 1px; }
+  .A .tab .dot.idle { background: #e6a117; }
+  .A .sec { padding: 12px 0; border-bottom: 1px solid #3f3f3f; }
+  .A .sec:last-child { border-bottom: 0; }
+  .A .sh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; font-weight: 700; font-size: 11px; color: #c8c8c8; }
+  .A .btn { display: flex; align-items: center; justify-content: center; height: 28px; border-radius: 4px; font-weight: 600; background: #4a4a4a; color: #eee; }
+  .A .btn + .btn { margin-top: 6px; }
+  .A .btn.go { background: #2d9d78; color: #fff; height: 32px; }
+  .A .btn.line { background: transparent; border: 1px solid #6a6a6a; color: #e6e6e6; }
+  .A .btn.small { height: 24px; padding: 0 10px; font-size: 10.5px; }
+  .A .recdot { width: 8px; height: 8px; border-radius: 4px; background: #fff; margin-right: 7px; }
+  .A .sw { width: 26px; height: 14px; border-radius: 7px; background: #5a5a5a; position: relative; margin-right: 6px; }
+  .A .sw i { position: absolute; left: 2px; top: 2px; width: 10px; height: 10px; border-radius: 5px; background: #cfcfcf; }
+  .A .sw.on { background: #378ef0; }
+  .A .sw.on i { left: 14px; background: #fff; }
+  .A .tog { display: flex; align-items: center; color: #bdbdbd; font-weight: 400; }
+  .A .kv { display: flex; }
+  .A .kv > div { flex: 1; min-width: 0; }
+  .A .kv > div + div { border-left: 1px solid #454545; padding-left: 10px; margin-left: 10px; }
+  .A .k { color: #8f8f8f; font-size: 10px; margin-bottom: 2px; }
+  .A .v { font-size: 14px; font-weight: 600; }
+  .A .idle { color: #e6a117; font-size: 10px; font-weight: 600; margin-left: 5px; }
+  .A .doc { display: flex; align-items: center; margin-top: 10px; color: #d8d8d8; }
+  .A .file { width: 10px; height: 12px; border: 1.5px solid #9a9a9a; border-radius: 2px; margin-right: 7px; flex: 0 0 auto; }
+  .A .link { color: #6aa9ff; font-weight: 600; margin-top: 8px; }
+  .A .layer { display: flex; align-items: center; }
+  .A .thumb { width: 22px; height: 16px; border: 1px solid #6a6a6a; background: #bdbdbd; border-radius: 2px; margin-right: 8px; flex: 0 0 auto; }
+  .A .seg { display: flex; border: 1px solid #555; border-radius: 4px; overflow: hidden; flex: 0 0 auto; }
+  .A .seg div { padding: 4px 9px; color: #b5b5b5; font-weight: 600; font-size: 10.5px; }
+  .A .seg div + div { border-left: 1px solid #555; }
+  .A .seg .on { background: #4d4d4d; color: #fff; }
+  .A .seg .on.g { background: #2d9d78; }
+  .A .hint { color: #8f8f8f; font-size: 10px; margin-top: 7px; line-height: 1.45; }
+  .A .path { background: #262626; border: 1px solid #1f1f1f; border-radius: 3px; padding: 6px 8px; font-size: 10px; color: #ddd; word-break: break-all; }
+  .A .item { padding: 10px 0; border-bottom: 1px solid #3f3f3f; }
+  .A .item:last-child { border-bottom: 0; }
+  .A .nm { font-weight: 700; font-size: 12px; }
+  .A .meta { color: #9a9a9a; font-size: 10px; margin-top: 3px; }
+  .A .tag { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; margin-left: 5px; }
+  .A .t-rec { background: #2d9d78; color: #fff; }
+  .A .t-ok { color: #7fd0a8; border: 1px solid #3f7a5e; }
+  .A .t-no { color: #f0c060; border: 1px solid #7a6330; }
+  .A .acts { display: flex; margin-top: 8px; }
+  .A .acts .btn { margin: 0 6px 0 0; }
+  .A .btn.danger { color: #ff9a8f; }
+  .A .dd { display: flex; align-items: center; justify-content: space-between; height: 26px; padding: 0 8px; background: #262626; border: 1px solid #1f1f1f; border-radius: 3px; }
+  .A .dd .c { color: #999; font-size: 9px; }
+  .A .opt { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .A .opt .l { color: #c8c8c8; }
+  .A .opt .dd { width: 110px; }
+
+  /* ================= B · STUDIO ================= */
+  .B { background: #2b2b2b; color: #ececec; padding: 10px 10px 14px; }
+  .B .tabs { display: flex; margin-bottom: 10px; }
+  .B .tab { flex: 1; text-align: center; padding: 7px 0; color: #8d8d8d; font-weight: 600; border-radius: 6px; }
+  .B .tab.on { background: #3a3a3a; color: #fff; }
+  .B .tab .dot { display: inline-block; width: 6px; height: 6px; border-radius: 3px; background: #3ecf7a; margin-right: 5px; vertical-align: 1px; }
+  .B .hero { background: #1f1f1f; border: 1px solid #1a1a1a; border-radius: 10px; padding: 12px; }
+  .B .hero.live { border-color: #245c3a; }
+  .B .status { display: flex; align-items: center; font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: #3ecf7a; }
+  .B .status .pip { width: 7px; height: 7px; border-radius: 4px; background: #3ecf7a; margin-right: 6px; }
+  .B .auto { margin-left: auto; display: flex; align-items: center; color: #9a9a9a; font-weight: 600; letter-spacing: 0; }
+  .B .sw { width: 24px; height: 13px; border-radius: 7px; background: #4a4a4a; position: relative; margin-left: 6px; }
+  .B .sw i { position: absolute; left: 2px; top: 2px; width: 9px; height: 9px; border-radius: 5px; background: #bbb; }
+  .B .sw.on { background: #6d7cff; }
+  .B .sw.on i { left: 13px; background: #fff; }
+  .B .clock { display: flex; align-items: center; margin-top: 10px; }
+  .B .time { font-size: 30px; font-weight: 600; letter-spacing: 0.5px; }
+  .B .rbtn { width: 46px; height: 46px; border-radius: 23px; background: #2f9e5c; display: flex; align-items: center; justify-content: center; margin-left: auto; flex: 0 0 auto; border: 3px solid #1f1f1f; outline: 2px solid #2f9e5c; }
+  .B .rbtn .core { width: 14px; height: 14px; border-radius: 7px; background: #fff; }
+  .B .docn { color: #9b9b9b; margin-top: 2px; }
+  .B .mini { display: flex; margin-top: 12px; }
+  .B .mini > div { flex: 1; background: #282828; border-radius: 7px; padding: 7px 9px; }
+  .B .mini > div + div { margin-left: 6px; }
+  .B .mk { color: #858585; font-size: 9.5px; }
+  .B .mv { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .B .btn { display: flex; align-items: center; justify-content: center; height: 34px; border-radius: 8px; font-weight: 700; background: #3a3a3a; color: #eee; }
+  .B .btn.pri { background: #5b6cff; color: #fff; margin-top: 8px; }
+  .B .btn.small { height: 26px; font-size: 10.5px; padding: 0 12px; border-radius: 6px; font-weight: 600; }
+  .B .ghost { display: flex; align-items: center; justify-content: center; margin-top: 8px; color: #8f8f8f; font-weight: 600; height: 26px; }
+  .B .card { background: #333; border-radius: 10px; padding: 11px; margin-top: 10px; }
+  .B .ref { display: flex; }
+  .B .bar { width: 3px; border-radius: 2px; background: #2f9e5c; margin-right: 10px; flex: 0 0 auto; }
+  .B .ch { font-weight: 700; font-size: 12px; }
+  .B .cs { color: #3ecf7a; font-size: 10px; font-weight: 600; margin-top: 2px; }
+  .B .seg { display: flex; background: #262626; border-radius: 7px; padding: 2px; margin-top: 9px; }
+  .B .seg div { flex: 1; text-align: center; padding: 5px 0; border-radius: 5px; color: #8d8d8d; font-weight: 600; }
+  .B .seg .on { background: #2f9e5c; color: #fff; }
+  .B .seg .on.n { background: #4a4a4a; }
+  .B .sub { color: #8a8a8a; font-size: 10px; margin-top: 7px; line-height: 1.45; }
+  .B .lbl { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: #7c7c7c; margin-bottom: 7px; }
+  .B .path { background: #262626; border-radius: 6px; padding: 7px 9px; font-size: 10px; word-break: break-all; color: #d0d0d0; }
+  .B .item { background: #333; border-radius: 10px; padding: 10px 11px; margin-top: 8px; }
+  .B .item.live { border-left: 3px solid #2f9e5c; }
+  .B .nm { font-weight: 700; font-size: 12px; }
+  .B .meta { color: #8f8f8f; font-size: 10px; margin-top: 3px; }
+  .B .tag { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 8px; margin-left: 5px; }
+  .B .t-rec { background: #2f9e5c; color: #fff; }
+  .B .t-ok { background: #25352c; color: #8fdcae; }
+  .B .t-no { background: #3b3222; color: #f2c56b; }
+  .B .acts { display: flex; margin-top: 9px; }
+  .B .acts .btn { margin-right: 6px; }
+  .B .btn.danger { background: #3d2a2a; color: #ffa39a; }
+  .B .row2 { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
+  .B .row2 .l { color: #cfcfcf; }
+  .B .dd { display: flex; align-items: center; justify-content: space-between; height: 26px; padding: 0 9px; background: #262626; border-radius: 6px; width: 112px; }
+  .B .dd .c { color: #888; font-size: 9px; }
+  .B .pillsel { display: flex; background: #262626; border-radius: 7px; padding: 2px; }
+  .B .pillsel div { flex: 1; text-align: center; padding: 5px 0; border-radius: 5px; color: #8d8d8d; font-weight: 600; }
+  .B .pillsel .on { background: #5b6cff; color: #fff; }
+
+  /* ================= C · SOFT ================= */
+  .C { background: #262626; color: #ededed; padding: 12px 12px 16px; }
+  .C .tabs { display: flex; background: #1d1d1d; border-radius: 12px; padding: 3px; margin-bottom: 12px; }
+  .C .tab { flex: 1; text-align: center; padding: 7px 0; border-radius: 9px; color: #888; font-weight: 600; }
+  .C .tab.on { background: #353535; color: #f2f2f2; }
+  .C .tab .dot { display: inline-block; width: 6px; height: 6px; border-radius: 3px; background: #4ade80; margin-right: 5px; vertical-align: 1px; }
+  .C .card { background: #2f2f2f; border: 1px solid #373737; border-radius: 14px; padding: 13px; margin-bottom: 10px; }
+  .C .ct { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; }
+  .C .ttl { font-size: 12.5px; font-weight: 700; }
+  .C .chip { display: flex; align-items: center; padding: 4px 10px 4px 5px; border-radius: 11px; background: #242424; color: #bdbdbd; font-weight: 600; font-size: 10.5px; }
+  .C .chip .sw { width: 22px; height: 12px; border-radius: 6px; background: #4d4d4d; position: relative; margin-right: 6px; }
+  .C .chip .sw i { position: absolute; left: 2px; top: 2px; width: 8px; height: 8px; border-radius: 4px; background: #bbb; }
+  .C .chip.on { background: #193a3a; color: #bff3ea; }
+  .C .chip.on .sw { background: #2bb3a3; }
+  .C .chip.on .sw i { left: 12px; background: #fff; }
+  .C .btn { display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 20px; font-weight: 700; font-size: 12px; background: #3b3b3b; color: #eee; }
+  .C .btn.live { background: #1f7a4a; color: #eafff2; border: 1px solid #2f9e5c; }
+  .C .btn.live .pip { width: 9px; height: 9px; border-radius: 5px; background: #6ff0a6; margin-right: 8px; }
+  .C .btn.soft { height: 32px; border-radius: 16px; font-size: 11px; background: #2c4d6b; color: #d8ecff; margin-top: 8px; }
+  .C .btn.small { height: 26px; border-radius: 13px; font-size: 10.5px; padding: 0 12px; font-weight: 600; }
+  .C .tiles { display: flex; }
+  .C .tile { flex: 1; background: #262626; border-radius: 11px; padding: 9px 10px; min-width: 0; }
+  .C .tile + .tile { margin-left: 6px; }
+  .C .tile .ic { width: 16px; height: 16px; border-radius: 5px; margin-bottom: 6px; }
+  .C .tile .k { color: #8a8a8a; font-size: 10px; }
+  .C .tile .v { font-size: 14px; font-weight: 700; margin-top: 1px; }
+  .C .i1 { background: #2c4d6b; } .C .i2 { background: #1f5a3e; } .C .i3 { background: #4d3b6b; }
+  .C .docline { display: flex; align-items: center; margin-top: 10px; padding: 8px 10px; background: #262626; border-radius: 10px; }
+  .C .docline .ico { width: 14px; height: 16px; border-radius: 3px; background: #454545; margin-right: 8px; flex: 0 0 auto; }
+  .C .docline .more { color: #8a8a8a; margin-left: 8px; font-size: 10px; }
+  .C .layer { display: flex; align-items: center; padding: 8px 10px; background: #262626; border-radius: 10px; }
+  .C .layer .th { width: 24px; height: 18px; border-radius: 5px; background: #bdbdbd; margin-right: 9px; flex: 0 0 auto; }
+  .C .layer .st { color: #8a8a8a; font-size: 10px; }
+  .C .seg { display: flex; background: #262626; border-radius: 12px; padding: 3px; margin-top: 8px; }
+  .C .seg div { flex: 1; text-align: center; padding: 6px 0; border-radius: 9px; color: #8a8a8a; font-weight: 600; }
+  .C .seg .on { background: #3d3d3d; color: #fff; }
+  .C .d { color: #8a8a8a; font-size: 10px; line-height: 1.5; margin-top: 8px; }
+  .C .path { background: #262626; border-radius: 10px; padding: 8px 10px; font-size: 10px; color: #cfcfcf; word-break: break-all; }
+  .C .item { background: #2f2f2f; border: 1px solid #373737; border-radius: 14px; padding: 11px 12px; margin-bottom: 8px; }
+  .C .nm { font-weight: 700; font-size: 12.5px; }
+  .C .meta { color: #8a8a8a; font-size: 10px; margin-top: 4px; }
+  .C .tag { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 9px; margin-left: 5px; }
+  .C .t-rec { background: #1f5a3e; color: #bdf5d4; }
+  .C .t-ok { background: #20303a; color: #a8d4ff; }
+  .C .t-no { background: #40331c; color: #ffd589; }
+  .C .acts { display: flex; margin-top: 9px; }
+  .C .acts .btn { margin-right: 6px; }
+  .C .btn.danger { background: #3a2626; color: #ffb0a8; }
+  .C .opt { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+  .C .opt .l { color: #d0d0d0; }
+  .C .dd { display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 10px; background: #262626; border-radius: 9px; width: 112px; }
+  .C .dd .c { color: #888; font-size: 9px; }
+
+  /* ================= D · COMPACT ================= */
+  .D { background: #303030; color: #e4e4e4; padding: 0 8px 10px; }
+  .D .top { display: flex; align-items: center; height: 32px; border-bottom: 1px solid #3d3d3d; margin: 0 -8px 8px; padding: 0 8px; }
+  .D .tab { padding: 0 8px; height: 32px; display: flex; align-items: center; color: #929292; font-weight: 600; }
+  .D .tab.on { color: #fff; background: #3a3a3a; }
+  .D .tab .dot { width: 6px; height: 6px; border-radius: 3px; background: #35c46f; margin-right: 5px; }
+  .D .top .sp { flex: 1; }
+  .D .auto { display: flex; align-items: center; color: #9a9a9a; font-size: 10px; font-weight: 600; }
+  .D .sw { width: 22px; height: 12px; border-radius: 6px; background: #555; position: relative; margin-left: 5px; }
+  .D .sw i { position: absolute; left: 2px; top: 2px; width: 8px; height: 8px; border-radius: 4px; background: #bbb; }
+  .D .sw.on { background: #3d8aff; }
+  .D .sw.on i { left: 12px; background: #fff; }
+  .D .ctl { display: flex; }
+  .D .btn { display: flex; align-items: center; justify-content: center; height: 28px; border-radius: 5px; font-weight: 600; background: #454545; color: #eee; padding: 0 10px; }
+  .D .btn.live { background: #2f9e5c; color: #fff; flex: 1; }
+  .D .btn.pri { background: #3d8aff; color: #fff; margin-left: 6px; }
+  .D .btn.small { height: 22px; font-size: 10px; padding: 0 8px; border-radius: 4px; }
+  .D .pip { width: 7px; height: 7px; border-radius: 4px; background: #fff; margin-right: 6px; }
+  .D .line { display: flex; align-items: center; margin-top: 7px; padding: 6px 8px; background: #282828; border-radius: 5px; }
+  .D .line .nm { flex: 1; min-width: 0; font-weight: 600; }
+  .D .stat { color: #a8a8a8; margin-left: 10px; white-space: nowrap; }
+  .D .stat b { color: #f0f0f0; font-weight: 600; }
+  .D .idle { color: #e6a117; font-weight: 700; }
+  .D .refl { display: flex; align-items: center; margin-top: 7px; }
+  .D .refl .lab { color: #9a9a9a; margin-right: 6px; white-space: nowrap; }
+  .D .refl .ln { flex: 1; min-width: 0; font-weight: 600; }
+  .D .seg { display: flex; border-radius: 5px; background: #282828; padding: 2px; margin-left: 6px; flex: 0 0 auto; }
+  .D .seg div { padding: 3px 8px; border-radius: 3px; color: #8d8d8d; font-weight: 600; font-size: 10px; }
+  .D .seg .on { background: #4a4a4a; color: #fff; }
+  .D .seg .on.g { background: #2f9e5c; }
+  .D .more { color: #8a8a8a; margin-top: 8px; font-weight: 600; font-size: 10px; }
+  .D .h { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: #7d7d7d; margin: 10px 0 5px; }
+  .D .h:first-child { margin-top: 2px; }
+  .D .path { background: #282828; border-radius: 4px; padding: 5px 7px; font-size: 10px; color: #d0d0d0; word-break: break-all; }
+  .D .item { display: flex; align-items: center; padding: 7px 0; border-bottom: 1px solid #3a3a3a; }
+  .D .item:last-child { border-bottom: 0; }
+  .D .item .nm { font-weight: 600; }
+  .D .item .meta { color: #939393; font-size: 10px; margin-top: 1px; }
+  .D .led { width: 7px; height: 7px; border-radius: 4px; margin-right: 8px; flex: 0 0 auto; }
+  .D .l-rec { background: #35c46f; } .D .l-ok { background: #5b7f6c; } .D .l-no { background: #d69e2e; } .D .l-off { background: #555; }
+  .D .iact { color: #8fb8ff; font-weight: 600; font-size: 10px; margin-left: 8px; }
+  .D .iact.danger { color: #ff9a8f; }
+  .D .opt { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+  .D .dd { display: flex; align-items: center; justify-content: space-between; height: 22px; padding: 0 7px; background: #282828; border-radius: 4px; width: 100px; }
+  .D .dd .c { color: #888; font-size: 9px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Timelapse Recorder — redesign options</h1>
+  <p class="intro">Four directions for the panel. Every option keeps the same tabs, the same sections in the same order, and the same controls (record/pause, auto record, export, live preview, reference layer Normal/Reference, library actions, settings). Only the look changes. Each is shown as it would appear docked in Photoshop at about 284&nbsp;px wide, while recording.</p>
+  <div class="jump"><a href="#a">A · Native</a><a href="#b">B · Studio</a><a href="#c">C · Soft</a><a href="#d">D · Compact</a></div>
+
+  <!-- ======================================================= A -->
+  <section class="design" id="a">
+    <h2>A · Native <span>looks like part of Photoshop</span></h2>
+    <p class="what">Uses Photoshop's own panel style: no boxes around sections, just thin dividers and plain headings. It has underline tabs, a blue accent and Photoshop-style switches, and the stats sit in one clean row. It's the calmest option and fits in with the Layers and Properties panels.</p>
+    <div class="row">
+      <div class="shot"><div class="cap">Record</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p A">
+          <div class="tabs"><div class="tab on"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="sec">
+            <div class="sh"><span>Recording</span><span class="tog"><span class="sw"><i></i></span>Auto record</span></div>
+            <div class="btn go"><span class="recdot"></span>Recording</div>
+            <div class="btn line">Export video</div>
+          </div>
+          <div class="sec">
+            <div class="kv">
+              <div><div class="k">Frames</div><div class="v">4,875</div></div>
+              <div><div class="k">Timer<span class="idle">IDLE</span></div><div class="v mono">2:34:12</div></div>
+              <div><div class="k">On disk</div><div class="v">1.6 GB</div></div>
+            </div>
+            <div class="doc"><span class="file"></span><span class="ell">griffith new.psd</span></div>
+            <div class="link">▸ Show live preview</div>
+          </div>
+          <div class="sec">
+            <div class="sh"><span>Reference layer</span></div>
+            <div class="layer"><span class="thumb"></span><span class="grow ell" style="font-weight:600">Sketch</span>
+              <div class="seg"><div class="on">Normal</div><div>Reference</div></div></div>
+            <div class="hint">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Library</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p A">
+          <div class="tabs"><div class="tab"><span class="dot"></span>Record</div><div class="tab on">Library</div><div class="tab">Settings</div></div>
+          <div class="sec">
+            <div class="sh"><span>Recordings folder</span></div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="fx" style="margin-top:8px"><span class="grow" style="color:#9a9a9a;font-size:10px">7 recordings · 1.7 GB of frames</span><div class="btn small">Open folder</div></div>
+          </div>
+          <div class="sec">
+            <div class="item"><div class="fx"><span class="grow ell nm">griffith new</span><span class="tag t-rec">REC</span><span class="tag t-ok">EXPORTED</span></div>
+              <div class="meta">4,875 frames · 1.6 GB · 2:34:12 work · recorded now</div>
+              <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+            <div class="item"><div class="fx"><span class="grow ell nm">365</span><span class="tag t-no">NOT EXPORTED</span></div>
+              <div class="meta">91 frames · 22 MB · 0:18:40 work · recorded 2 d ago</div>
+              <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+            <div class="item"><div class="fx"><span class="grow ell nm">Untitled-2</span></div>
+              <div class="meta">0 frames · 0 KB · 0:02:10 work · recorded 5 d ago</div>
+              <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete folder</div></div></div>
+          </div>
+          <div class="btn line small" style="width:110px;margin:4px auto 0">Refresh</div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Settings</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p A">
+          <div class="tabs"><div class="tab"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab on">Settings</div></div>
+          <div class="sec">
+            <div class="sh"><span>Frames folder</span></div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="btn small line" style="margin-top:8px;width:120px">Change folder…</div>
+          </div>
+          <div class="sec">
+            <div class="sh"><span>Recording</span></div>
+            <div class="opt"><span class="l">Quality</span><div class="dd"><span>Default</span><span class="c">▼</span></div></div>
+            <div class="opt"><span class="tog"><span class="sw on"><i></i></span>Remove frames with undo</span></div>
+          </div>
+          <div class="sec">
+            <div class="sh"><span>Reference layers</span></div>
+            <div class="opt" style="margin-top:0"><span class="l">Name tag</span><div class="dd"><span>[ref]</span><span class="c">▼</span></div></div>
+          </div>
+          <div class="sec">
+            <div class="sh"><span>Work timer</span></div>
+            <div class="opt" style="margin-top:0"><span class="l">Stop counting after</span><div class="dd"><span>30 s idle</span><span class="c">▼</span></div></div>
+          </div>
+        </div></div></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= B -->
+  <section class="design" id="b">
+    <h2>B · Studio <span>the timer is the star</span></h2>
+    <p class="what">A dark "hero" box at the top shows the work timer in big numbers, with a round record button. The button is green while recording and grey while paused, and the green outline around the box shows at a glance that you're live. Export is a strong violet button. The reference layer card gets a green bar on its left when the layer is a reference. This one is the most distinctive and feels most like an app.</p>
+    <div class="row">
+      <div class="shot"><div class="cap">Record</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p B">
+          <div class="tabs"><div class="tab on"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="hero live">
+            <div class="status"><span class="pip"></span>RECORDING<span class="auto">Auto<span class="sw"><i></i></span></span></div>
+            <div class="clock"><div class="grow"><div class="time mono">2:34:12</div><div class="docn ell">griffith new.psd</div></div><div class="rbtn"><span class="core"></span></div></div>
+            <div class="mini"><div><div class="mk">Frames</div><div class="mv">4,875</div></div><div><div class="mk">On disk</div><div class="mv">1.6 GB</div></div></div>
+          </div>
+          <div class="btn pri">Export video</div>
+          <div class="ghost">▸ Show live preview</div>
+          <div class="card">
+            <div class="lbl">REFERENCE LAYER</div>
+            <div class="ref"><span class="bar"></span><div class="grow">
+              <div class="ch ell">Sketch</div><div class="cs">Not recorded — reference layer</div></div></div>
+            <div class="seg"><div>Normal</div><div class="on">Reference</div></div>
+            <div class="sub">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Library</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p B">
+          <div class="tabs"><div class="tab"><span class="dot"></span>Record</div><div class="tab on">Library</div><div class="tab">Settings</div></div>
+          <div class="hero" style="padding:11px">
+            <div class="lbl">RECORDINGS FOLDER</div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="fx" style="margin-top:9px"><span class="grow"><b style="font-size:15px">1.7 GB</b> <span style="color:#8f8f8f;font-size:10px">· 7 recordings</span></span><div class="btn small">Open folder</div></div>
+          </div>
+          <div class="item live"><div class="fx"><span class="grow ell nm">griffith new</span><span class="tag t-rec">REC</span><span class="tag t-ok">EXPORTED</span></div>
+            <div class="meta">4,875 frames · 1.6 GB · 2:34:12 work · recorded now</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+          <div class="item"><div class="fx"><span class="grow ell nm">365</span><span class="tag t-no">NOT EXPORTED</span></div>
+            <div class="meta">91 frames · 22 MB · 0:18:40 work · recorded 2 d ago</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+          <div class="item"><div class="fx"><span class="grow ell nm">Untitled-2</span></div>
+            <div class="meta">0 frames · 0 KB · 0:02:10 work · recorded 5 d ago</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete folder</div></div></div>
+          <div class="ghost">↻ Refresh</div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Settings</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p B">
+          <div class="tabs"><div class="tab"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab on">Settings</div></div>
+          <div class="card" style="margin-top:0"><div class="lbl">FRAMES FOLDER</div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="btn small" style="margin-top:8px;width:120px">Change folder…</div></div>
+          <div class="card"><div class="lbl">RECORDING QUALITY</div>
+            <div class="pillsel"><div>Low</div><div class="on">Default</div><div>High</div></div>
+            <div class="row2"><span class="l">Remove frames with undo</span><span class="sw on"><i></i></span></div></div>
+          <div class="card"><div class="lbl">REFERENCE LAYERS</div>
+            <div class="row2" style="margin-top:0"><span class="l">Name tag</span><div class="dd"><span>[ref]</span><span class="c">▼</span></div></div></div>
+          <div class="card"><div class="lbl">WORK TIMER</div>
+            <div class="row2" style="margin-top:0"><span class="l">Idle after</span><div class="dd"><span>30 s</span><span class="c">▼</span></div></div></div>
+        </div></div></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= C -->
+  <section class="design" id="c">
+    <h2>C · Soft <span>rounded and friendly</span></h2>
+    <p class="what">This is closest to the current design, but softer: bigger corner radii, a tall pill-shaped record button, and a bit more breathing room. Each stat tile has a small coloured marker, and the colours are muted: teal for toggles, blue for export, green for recording. It's friendly and modern without feeling out of place in Photoshop.</p>
+    <div class="row">
+      <div class="shot"><div class="cap">Record</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p C">
+          <div class="tabs"><div class="tab on"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="card">
+            <div class="ct"><span class="ttl">Recording</span><span class="chip"><span class="sw"><i></i></span>Auto</span></div>
+            <div class="btn live"><span class="pip"></span>Recording</div>
+            <div class="btn soft">Export video</div>
+          </div>
+          <div class="card">
+            <div class="tiles">
+              <div class="tile"><div class="ic i1"></div><div class="k">Frames</div><div class="v">4,875</div></div>
+              <div class="tile"><div class="ic i2"></div><div class="k">Timer</div><div class="v mono" style="font-size:13px">2:34:12</div></div>
+              <div class="tile"><div class="ic i3"></div><div class="k">On disk</div><div class="v">1.6 GB</div></div>
+            </div>
+            <div class="docline"><span class="ico"></span><span class="grow ell">griffith new.psd</span><span class="more">Preview ▸</span></div>
+          </div>
+          <div class="card">
+            <div class="ct" style="margin-bottom:9px"><span class="ttl">Reference layer</span></div>
+            <div class="layer"><span class="th"></span><span class="grow ell" style="font-weight:600">Sketch</span><span class="st">Recorded</span></div>
+            <div class="seg"><div class="on">Normal</div><div>Reference</div></div>
+            <div class="d">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Library</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p C">
+          <div class="tabs"><div class="tab"><span class="dot"></span>Record</div><div class="tab on">Library</div><div class="tab">Settings</div></div>
+          <div class="card">
+            <div class="ct" style="margin-bottom:9px"><span class="ttl">Recordings folder</span></div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="fx" style="margin-top:9px"><span class="grow" style="color:#8a8a8a;font-size:10px">7 recordings · 1.7 GB</span><div class="btn small">Open folder</div></div>
+          </div>
+          <div class="item"><div class="fx"><span class="grow ell nm">griffith new</span><span class="tag t-rec">REC</span><span class="tag t-ok">EXPORTED</span></div>
+            <div class="meta">4,875 frames · 1.6 GB · 2:34:12 work · recorded now</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+          <div class="item"><div class="fx"><span class="grow ell nm">365</span><span class="tag t-no">NOT EXPORTED</span></div>
+            <div class="meta">91 frames · 22 MB · 0:18:40 work · recorded 2 d ago</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+          <div class="item"><div class="fx"><span class="grow ell nm">Untitled-2</span></div>
+            <div class="meta">0 frames · 0 KB · 0:02:10 work · recorded 5 d ago</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete folder</div></div></div>
+          <div class="btn small" style="width:110px;margin:4px auto 0">Refresh</div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Settings</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p C">
+          <div class="tabs"><div class="tab"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab on">Settings</div></div>
+          <div class="card"><div class="ct" style="margin-bottom:9px"><span class="ttl">Frames folder</span></div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="btn small" style="margin-top:9px;width:120px">Change folder…</div></div>
+          <div class="card"><div class="ct" style="margin-bottom:0"><span class="ttl">Recording</span></div>
+            <div class="opt"><span class="l">Quality</span><div class="dd"><span>Default</span><span class="c">▼</span></div></div>
+            <div class="opt"><span class="chip on"><span class="sw"><i></i></span>Remove frames with undo</span></div></div>
+          <div class="card"><div class="ct" style="margin-bottom:0"><span class="ttl">Reference layers</span></div>
+            <div class="opt"><span class="l">Name tag</span><div class="dd"><span>[ref]</span><span class="c">▼</span></div></div></div>
+          <div class="card"><div class="ct" style="margin-bottom:0"><span class="ttl">Work timer</span></div>
+            <div class="opt"><span class="l">Idle after</span><div class="dd"><span>30 s</span><span class="c">▼</span></div></div></div>
+        </div></div></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= D -->
+  <section class="design" id="d">
+    <h2>D · Compact <span>everything in a short panel</span></h2>
+    <p class="what">Made for a small panel height (you lowered the minimum to 100 px). Auto record moves up next to the tabs. Record and Export share one row. The document name, frame count, timer and disk use fit on one line, and the reference layer is a single row. The whole Record tab is about 170 px tall. The Library shows each recording as one line with a coloured status dot: green is recording, grey-green is exported, yellow is not exported, grey is empty.</p>
+    <div class="row">
+      <div class="shot"><div class="cap">Record</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p D">
+          <div class="top"><div class="tab on"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div><span class="sp"></span><span class="auto">Auto<span class="sw"><i></i></span></span></div>
+          <div class="ctl"><div class="btn live"><span class="pip"></span>Recording</div><div class="btn pri">Export</div></div>
+          <div class="line"><span class="nm ell">griffith new.psd</span><span class="stat"><b>4,875</b> fr</span><span class="stat"><b class="mono">2:34:12</b></span><span class="stat"><b>1.6</b> GB</span></div>
+          <div class="refl"><span class="lab">Ref layer</span><span class="ln ell">Sketch</span><div class="seg"><div>Normal</div><div class="on g">Reference</div></div></div>
+          <div class="more">▸ Show live preview</div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Library</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p D">
+          <div class="top"><div class="tab"><span class="dot"></span>Record</div><div class="tab on">Library</div><div class="tab">Settings</div><span class="sp"></span><span class="iact">↻ Refresh</span></div>
+          <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+          <div class="fx" style="margin:6px 0 2px"><span class="grow" style="color:#939393;font-size:10px">7 recordings · 1.7 GB</span><span class="iact">Open folder</span></div>
+          <div class="item"><span class="led l-rec"></span><div class="grow"><div class="nm ell">griffith new</div><div class="meta">4,875 fr · 1.6 GB · 2:34:12 · now</div></div><span class="iact">Open</span><span class="iact danger">Delete frames</span></div>
+          <div class="item"><span class="led l-no"></span><div class="grow"><div class="nm ell">365</div><div class="meta">91 fr · 22 MB · 0:18:40 · 2 d ago</div></div><span class="iact">Open</span><span class="iact danger">Delete frames</span></div>
+          <div class="item"><span class="led l-ok"></span><div class="grow"><div class="nm ell">0001-067</div><div class="meta">25 fr · 6 MB · 0:09:12 · 4 d ago</div></div><span class="iact">Open</span><span class="iact danger">Delete frames</span></div>
+          <div class="item"><span class="led l-off"></span><div class="grow"><div class="nm ell">Untitled-2</div><div class="meta">0 fr · 0:02:10 · 5 d ago</div></div><span class="iact">Open</span><span class="iact danger">Delete folder</span></div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Settings</div><div class="frame"><div class="psbar"><b>Timelapse Recorder</b></div>
+        <div class="p D">
+          <div class="top"><div class="tab"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab on">Settings</div></div>
+          <div class="h">FRAMES FOLDER</div>
+          <div class="fx"><div class="path mono grow">C:\BILDER 2\…\timelapse mine</div><div class="btn small" style="margin-left:6px">Change…</div></div>
+          <div class="h">RECORDING</div>
+          <div class="opt"><span>Quality</span><div class="dd"><span>Default</span><span class="c">▼</span></div></div>
+          <div class="opt"><span>Remove frames with undo</span><span class="sw on"><i></i></span></div>
+          <div class="h">REFERENCE LAYERS</div>
+          <div class="opt" style="margin-top:0"><span>Name tag</span><div class="dd"><span>[ref]</span><span class="c">▼</span></div></div>
+          <div class="h">WORK TIMER</div>
+          <div class="opt" style="margin-top:0"><span>Idle after</span><div class="dd"><span>30 s</span><span class="c">▼</span></div></div>
+        </div></div></div>
+    </div>
+  </section>
+
+  <p class="note">All four only use things Photoshop's plugin panels draw reliably: flex rows and columns spaced with margins (no <code>gap</code>), exact corner radii (no <code>999px</code>), flat colours and 1&nbsp;px borders (no shadows or gradients), and shapes made from styled boxes instead of icon fonts. Design B's round record button uses an <code>outline</code> ring, and Photoshop might not draw that part. If it doesn't, it would be swapped for a plain border. The colours and details of any option can be mixed: for example, B's hero timer on top of A's plain layout.</p>
+</div>
+</body>
+</html>

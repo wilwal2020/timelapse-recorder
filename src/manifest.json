@@ -1,0 +1,47 @@
+{
+  "manifestVersion": 5,
+  "id": "com.william.timelapserecorder",
+  "name": "Timelapse Recorder",
+  "version": "1.5.20",
+  "main": "index.html",
+  "host": {
+    "app": "PS",
+    "minVersion": "25.0.0"
+  },
+  "requiredPermissions": {
+    "localFileSystem": "fullAccess",
+    "launchProcess": {
+      "schemes": ["https"],
+      "extensions": ["", ".bat", ".vbs", ".mp4"]
+    }
+  },
+  "icons": [
+    {
+      "width": 48, "height": 48, "path": "icons/plugin.png",
+      "scale": [1, 2],
+      "theme": ["darkest", "dark", "medium", "lightest", "light"],
+      "species": ["pluginList"]
+    }
+  ],
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "timelapseRecorderPanel",
+      "label": { "default": "Timelapse Recorder" },
+      "minimumSize": { "width": 240, "height": 100 },
+      "maximumSize": { "width": 2000, "height": 2000 },
+      "preferredDockedSize": { "width": 280, "height": 560 },
+      "preferredFloatingSize": { "width": 300, "height": 600 },
+      "icons": [
+        {
+          "width": 23, "height": 23, "path": "icons/panel_dark.png",
+          "scale": [1, 2], "theme": ["darkest", "dark", "medium"]
+        },
+        {
+          "width": 23, "height": 23, "path": "icons/panel_light.png",
+          "scale": [1, 2], "theme": ["lightest", "light"]
+        }
+      ]
+    }
+  ]
+}

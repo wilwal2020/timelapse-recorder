@@ -1,0 +1,1 @@
+﻿{ "private": true, "description": "Offline tests for the Timelapse Recorder plugin (mock Photoshop + UXP)", "scripts": { "test": "node test_pure.js && node sim.js && node ui_test.js && node ffmpeg_real.js" }, "devDependencies": { "jpeg-js": "0.4.4", "jsdom": "24.1.3" } }

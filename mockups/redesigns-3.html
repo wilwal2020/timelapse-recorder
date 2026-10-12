@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel Redesigns 3</title>
+<style>
+  /* ============ page chrome (not part of the plugin) ============ */
+  html, body { margin: 0; background: #161616; color: #d6d6d6; font-family: -apple-system, "Segoe UI", sans-serif; }
+  .page { max-width: 1000px; margin: 0 auto; padding: 28px 16px 60px; }
+  .page h1 { font-size: 22px; margin: 0 0 6px; }
+  .intro { color: #8a8a8a; font-size: 13px; line-height: 1.55; margin: 0; max-width: 740px; }
+  .design { margin-top: 42px; }
+  .design h2 { font-size: 17px; margin: 0 0 4px; }
+  .what { color: #8a8a8a; font-size: 13px; line-height: 1.55; margin: 0 0 14px; max-width: 760px; }
+  .what b { color: #cfcfcf; font-weight: 600; }
+  .row { display: flex; flex-wrap: wrap; align-items: flex-start; }
+  .shot { margin: 0 18px 18px 0; }
+  .cap { font-size: 11px; color: #8a8a8a; margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .frame { width: 284px; border: 1px solid #2c2c2c; border-radius: 6px; overflow: hidden; }
+  .psbar { height: 22px; background: #262626; border-bottom: 1px solid #1d1d1d; display: flex; align-items: center; padding: 0 8px; font-size: 11px; color: #ddd; font-weight: 600; }
+  .note { color: #8a8a8a; font-size: 12px; margin-top: 30px; line-height: 1.6; border-top: 1px solid #2a2a2a; padding-top: 16px; max-width: 760px; }
+  @media (max-width: 640px) { .shot { margin-right: 0; } .frame { width: calc(100vw - 34px); max-width: 284px; } }
+
+  /* ============ panel basics (UXP-safe: flex + margins, exact radii, flat colours) ============ */
+  .p { font-size: 11px; line-height: 1.35; user-select: none; }
+  .p * { box-sizing: border-box; }
+  .p .fx { display: flex; align-items: center; }
+  .p .grow { flex: 1; min-width: 0; }
+  .p .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p .mono { font-family: "SF Mono", Consolas, monospace; }
+
+  /* ================= 1 · CURRENT + PICKS ================= */
+  .K { background: #2e2e2e; color: #e8e8e8; padding: 10px 10px 14px; }
+  .K .tabs { display: flex; padding: 3px; background: #2a2a2a; border: 1px solid #242424; border-radius: 9px; margin-bottom: 10px; }
+  .K .tab { flex: 1; text-align: center; padding: 6px 0; border-radius: 6px; color: #9d9d9d; }
+  .K .tab.on { background: #474747; color: #e8e8e8; font-weight: 600; }
+  .K .tab + .tab { margin-left: 2px; }
+  .K .dot { display: inline-block; width: 6px; height: 6px; border-radius: 3px; background: #38b46a; margin-right: 6px; vertical-align: 1px; }
+  .K .card { background: #383838; border: 1px solid #424242; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+  .K .card.dark { background: #2a2a2a; border-color: #242424; }
+  .K .sh { display: flex; align-items: center; justify-content: space-between; min-height: 22px; margin-bottom: 8px; }
+  .K .st { font-size: 9.5px; letter-spacing: 1.1px; text-transform: uppercase; color: #8a8a8a; font-weight: 700; }
+  .K .btn { display: flex; align-items: center; justify-content: center; padding: 7px 10px; border-radius: 7px; background: #474747; color: #e8e8e8; font-weight: 600; }
+  .K .btn.big { padding: 11px 10px; font-size: 12px; border-radius: 8px; }
+  .K .btn.live { background: #2f9e5c; color: #fff; }
+  .K .btn.pri { background: #3d8aff; color: #fff; margin-top: 8px; }
+  .K .btn.small { padding: 5px 12px; font-size: 10px; border-radius: 11px; }
+  .K .btn.danger { color: #ff9f96; background: #4a3434; }
+  .K .ico-live { width: 10px; height: 10px; border-radius: 5px; background: #fff; margin-right: 7px; }
+  .K .stats { display: flex; }
+  .K .stat { flex: 1; min-width: 0; background: #2a2a2a; border: 1px solid #242424; border-radius: 7px; padding: 7px 8px; }
+  .K .stat.w { flex: 1.3; }
+  .K .stat + .stat { margin-left: 6px; }
+  .K .k { color: #767676; font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; white-space: nowrap; }
+  .K .v { font-size: 14px; font-weight: 600; margin-top: 3px; white-space: nowrap; }
+  .K .v.mono { font-size: 13px; }
+  .K .recbar { display: flex; align-items: center; margin-top: 6px; padding: 7px 9px; background: #2a2a2a; border: 1px solid #242424; border-radius: 7px; }
+  .K .recbar .nm { flex: 1; min-width: 0; font-weight: 600; }
+  .K .pv { flex: 0 0 auto; margin-left: 8px; color: #9d9d9d; font-weight: 600; font-size: 10.5px; }
+  .K .layerchip { display: flex; align-items: center; padding: 6px 8px; background: #2a2a2a; border: 1px solid #242424; border-radius: 7px; }
+  .K .thumb { width: 22px; height: 17px; margin-right: 8px; border-radius: 3px; background: #bdbdbd; border: 1px solid #6a6a6a; flex: 0 0 auto; }
+  .K .lstate { margin-left: 8px; font-size: 10px; color: #9d9d9d; }
+  .K .seg { display: flex; margin-top: 7px; padding: 3px; background: #2a2a2a; border: 1px solid #242424; border-radius: 8px; }
+  .K .seg div { flex: 1; text-align: center; padding: 6px 0; border-radius: 6px; color: #9d9d9d; font-weight: 600; }
+  .K .seg div + div { margin-left: 2px; }
+  .K .seg .on { background: #474747; color: #e8e8e8; }
+  .K .desc { color: #9d9d9d; font-size: 10px; line-height: 1.45; margin-top: 6px; }
+  .K .lbl { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: #7c7c7c; margin-bottom: 7px; }
+  .K .path { background: #232323; border-radius: 6px; padding: 7px 9px; font-size: 10px; word-break: break-all; color: #d0d0d0; }
+  .K .refresh { text-align: center; color: #cfcfcf; font-weight: 600; margin: 2px 0 0; padding: 4px 0; }
+  .K .item { background: #383838; border: 1px solid #424242; border-radius: 8px; padding: 10px 11px; margin-top: 8px; }
+  .K .inm { font-weight: 700; font-size: 12px; }
+  .K .meta { color: #9d9d9d; font-size: 10px; margin-top: 3px; }
+  .K .tag { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 7px; margin-left: 5px; letter-spacing: 0.5px; }
+  .K .t-rec { background: #2f9e5c; color: #fff; }
+  .K .t-ok { background: #2d4436; color: #b9e8c9; }
+  .K .t-no { background: #4d3f21; color: #ffe2a3; }
+  .K .acts { display: flex; justify-content: center; margin-top: 9px; }
+  .K .acts .btn { margin: 0 3px; }
+  .K .r2 { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
+  .K .r2 .l { color: #d4d4d4; }
+  .K .dd { display: flex; align-items: center; justify-content: space-between; height: 27px; padding: 0 9px; background: #2a2a2a; border: 1px solid #242424; border-radius: 6px; width: 112px; }
+  .K .dd.full { width: auto; }
+  .K .dd .c { color: #9d9d9d; font-size: 9px; margin-left: 6px; }
+  .K .dd span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .K .dd.dis { opacity: 0.4; }
+  .K .qsel { display: flex; background: #2a2a2a; border: 1px solid #242424; border-radius: 8px; padding: 2px; }
+  .K .qsel div { flex: 1; text-align: center; padding: 5px 0; border-radius: 6px; color: #9d9d9d; font-weight: 600; }
+  .K .qsel .on { background: #3d8aff; color: #fff; }
+  .K .back { padding: 4px 10px; font-weight: 600; background: #474747; border-radius: 11px; margin-right: 8px; }
+  .K .mini { width: 84px; flex: 0 0 auto; }
+  .K .sw { width: 26px; height: 14px; border-radius: 7px; background: #555; position: relative; flex: 0 0 auto; }
+  .K .sw i { position: absolute; left: 2px; top: 2px; width: 10px; height: 10px; border-radius: 5px; background: #cfcfcf; }
+  .K .sw.on { background: #3d8aff; }
+  .K .sw.on i { left: 14px; background: #fff; }
+  /* style 1: switch rows — label left, switch right */
+  .K .swrow { display: flex; align-items: center; min-height: 28px; }
+  .K .swrow .l { flex: 1; min-width: 0; color: #d4d4d4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .K .swrow .l.off { color: #a9a9a9; }
+  .K .swrow .dd { margin-right: 10px; }
+  .K .swrow + .swrow { border-top: 1px solid #424242; }
+  .K .hsw { display: flex; align-items: center; color: #a9a9a9; font-weight: 600; font-size: 10.5px; }
+  .K .hsw .sw { margin-left: 7px; }
+  /* style 2: the solid pill, with a small capsule switch instead of the ring */
+  .K .pc { display: inline-flex; align-items: center; max-width: 100%; min-width: 0; flex: 0 1 auto; padding: 4px 11px 4px 5px; border-radius: 12px; border: 1px solid #4a4a4a; color: #a9a9a9; font-weight: 600; line-height: 14px; }
+  .K .pc .cs { width: 22px; height: 12px; border-radius: 6px; border: 1.5px solid #7a7a7a; position: relative; margin-right: 7px; flex: 0 0 auto; }
+  .K .pc .cs i { position: absolute; left: 2px; top: 2px; width: 5px; height: 5px; border-radius: 3px; background: #8a8a8a; }
+  .K .pc.on { background: #2f6fd1; border-color: #2f6fd1; color: #fff; }
+  .K .pc.on .cs { background: #fff; border-color: #fff; }
+  .K .pc.on .cs i { left: 12px; background: #2f6fd1; }
+  .K .pc .tx { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .K .pc.sm { font-size: 10.5px; padding: 3px 10px 3px 4px; }
+  .K .optrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; min-height: 28px; }
+  .K .optrow:last-child { margin-bottom: 0; }
+  .K .optrow .dd { margin-left: 8px; }
+
+  /* ================= 2 · STUDIO, REVISED AGAIN ================= */
+  .B { background: #2b2b2b; color: #ececec; padding: 10px 10px 14px; }
+  .B .tabs { display: flex; margin-bottom: 10px; }
+  .B .tab { flex: 1; text-align: center; padding: 7px 0; color: #8d8d8d; font-weight: 600; border-radius: 6px; }
+  .B .tab.on { background: #3a3a3a; color: #fff; }
+  .B .dot { display: inline-block; width: 6px; height: 6px; border-radius: 3px; margin-right: 5px; vertical-align: 1px; background: #e8b030; }
+  .B .dot.g { background: #3ecf7a; }
+  .B .dot.r { background: #ff5a52; }
+  .B .hero { background: #1f1f1f; border: 1px solid #1a1a1a; border-radius: 10px; padding: 12px; }
+  .B .hero.g { border-color: #2a6b44; }
+  .B .hero.r { border-color: #7a2e2b; }
+  .B .hero.y { border-color: #5a4a22; }
+  .B .status { display: flex; align-items: center; font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: #8a8a8a; }
+  .B .status.g { color: #3ecf7a; } .B .status.r { color: #ff6b63; } .B .status.y { color: #e8b030; }
+  .B .pip { width: 7px; height: 7px; border-radius: 4px; background: #666; margin-right: 6px; }
+  .B .status.g .pip { background: #3ecf7a; } .B .status.r .pip { background: #ff5a52; }
+  .B .pbars { width: 7px; height: 8px; border-left: 2px solid #e8b030; border-right: 2px solid #e8b030; margin-right: 6px; }
+  .B .auto { margin-left: auto; display: flex; align-items: center; color: #9a9a9a; font-weight: 600; letter-spacing: 0; }
+  .B .sw { width: 24px; height: 13px; border-radius: 7px; background: #4a4a4a; position: relative; margin-left: 6px; flex: 0 0 auto; }
+  .B .sw i { position: absolute; left: 2px; top: 2px; width: 9px; height: 9px; border-radius: 5px; background: #bbb; }
+  .B .sw.on { background: #6d7cff; }
+  .B .sw.on i { left: 13px; background: #fff; }
+  .B .clock { display: flex; align-items: center; margin-top: 8px; }
+  .B .time { font-size: 30px; font-weight: 600; letter-spacing: 0.5px; }
+  .B .time.dim { color: #5c5c5c; }
+  .B .time.half { color: #a8a8a8; }
+  .B .docrow { display: flex; align-items: center; margin-top: 1px; }
+  .B .docn { flex: 1; min-width: 0; color: #9b9b9b; }
+  .B .pv { flex: 0 0 auto; margin-left: 8px; color: #9b9b9b; font-weight: 600; font-size: 10.5px; }
+  /* the record button: a ring with a classic symbol (UXP-safe: nested circles, no outline) */
+  .B .rc { width: 48px; height: 48px; border-radius: 24px; border: 2px solid #555; display: flex; align-items: center; justify-content: center; margin-left: auto; flex: 0 0 auto; }
+  .B .rc .in { width: 36px; height: 36px; border-radius: 18px; display: flex; align-items: center; justify-content: center; }
+  .B .rc .rdot { width: 18px; height: 18px; border-radius: 9px; background: #ff453a; }
+  .B .rc .pz { width: 12px; height: 14px; border-left: 4px solid #fff; border-right: 4px solid #fff; }
+  .B .rc.r { border-color: #ff453a; } .B .rc.r .in { background: #ff453a; }
+  .B .rc.g { border-color: #2fae64; } .B .rc.g .in { background: #2fae64; }
+  .B .rc.idle .in { background: #2c2c2c; }
+  .B .rcap { font-size: 9px; color: #8a8a8a; text-align: center; margin-top: 4px; font-weight: 600; letter-spacing: 0.5px; }
+  .B .mini { display: flex; margin-top: 11px; }
+  .B .mini > div { flex: 1; background: #282828; border-radius: 7px; padding: 7px 9px; }
+  .B .mini > div + div { margin-left: 6px; }
+  .B .mk { color: #858585; font-size: 9.5px; }
+  .B .mv { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .B .mv.dim { color: #5c5c5c; }
+  .B .btn { display: flex; align-items: center; justify-content: center; height: 34px; border-radius: 8px; font-weight: 700; background: #3a3a3a; color: #eee; }
+  .B .btn.pri { background: #5b6cff; color: #fff; margin-top: 8px; }
+  .B .btn.pri.dis { opacity: 0.35; }
+  .B .btn.small { height: 26px; font-size: 10.5px; padding: 0 12px; border-radius: 6px; font-weight: 600; }
+  .B .btn.danger { background: #3d2a2a; color: #ffa39a; }
+  .B .card { background: #333; border-radius: 10px; padding: 11px; margin-top: 10px; }
+  .B .lbl { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: #7c7c7c; margin-bottom: 7px; }
+  .B .ref { display: flex; }
+  .B .bar { width: 3px; border-radius: 2px; background: #555; margin-right: 10px; flex: 0 0 auto; }
+  .B .bar.g { background: #2f9e5c; }
+  .B .ch { font-weight: 700; font-size: 12px; }
+  .B .cs { color: #8a8a8a; font-size: 10px; font-weight: 600; margin-top: 2px; }
+  .B .cs.g { color: #3ecf7a; }
+  .B .seg { display: flex; background: #262626; border-radius: 7px; padding: 2px; margin-top: 9px; }
+  .B .seg div { flex: 1; text-align: center; padding: 5px 0; border-radius: 5px; color: #8d8d8d; font-weight: 600; }
+  .B .seg .on { background: #4a4a4a; color: #fff; }
+  .B .seg .on.g { background: #2f9e5c; }
+  .B .sub { color: #8a8a8a; font-size: 10px; margin-top: 7px; line-height: 1.45; }
+  .B .path { background: #262626; border-radius: 6px; padding: 7px 9px; font-size: 10px; word-break: break-all; color: #d0d0d0; }
+  .B .refresh { text-align: center; color: #cfcfcf; font-weight: 600; margin: 2px 0 0; padding: 4px 0; }
+  .B .item { background: #333; border-radius: 10px; padding: 10px 11px; margin-top: 8px; }
+  .B .nm { font-weight: 700; font-size: 12px; }
+  .B .meta { color: #8f8f8f; font-size: 10px; margin-top: 3px; }
+  .B .tag { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 8px; margin-left: 5px; }
+  .B .t-rec { background: #2f9e5c; color: #fff; }
+  .B .t-ok { background: #25352c; color: #8fdcae; }
+  .B .t-no { background: #3b3222; color: #f2c56b; }
+  .B .acts { display: flex; justify-content: center; margin-top: 9px; }
+  .B .acts .btn { margin: 0 3px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Timelapse Recorder — redesign test 3</h1>
+  <p class="intro">Your changes to both options. Everything still works the same as the plugin does now.</p>
+
+  <!-- ================================================================ 1 -->
+  <section class="design">
+    <h2>1 · Current, with your picks</h2>
+    <p class="what">
+      Two ways to do the toggles: <b>switch rows</b> (label on the left, switch on the right) and the <b>solid pill</b>, now with a small capsule switch instead of the circle. Each is shown on the Record tab (Auto record) and in the export settings.
+      <b>Preview</b> is plain text in the file name bar. In the Library, <b>Refresh</b> is plain text above the recordings, and <b>Open folder / Delete frames</b> are centred.
+    </p>
+    <div class="row">
+      <div class="shot"><div class="cap">Record · switch rows</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p K">
+          <div class="tabs"><div class="tab on"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="card">
+            <div class="sh"><span class="st">Recording</span><span class="hsw">Auto record<span class="sw"><i></i></span></span></div>
+            <div class="btn big live"><span class="ico-live"></span>Recording</div>
+            <div class="btn pri">Export video</div>
+          </div>
+          <div class="card">
+            <div class="stats">
+              <div class="stat"><div class="k">Frames</div><div class="v">4,875</div></div>
+              <div class="stat w"><div class="k">Timer</div><div class="v mono">2:34:12</div></div>
+              <div class="stat"><div class="k">On disk</div><div class="v">1.6 GB</div></div>
+            </div>
+            <div class="recbar"><span class="nm ell">griffith new.psd</span><span class="pv">Preview ▸</span></div>
+          </div>
+          <div class="card">
+            <div class="sh"><span class="st">Reference layer</span></div>
+            <div class="layerchip"><span class="thumb"></span><span class="grow ell" style="font-weight:600">Sketch</span><span class="lstate">Recorded</span></div>
+            <div class="seg"><div class="on">Normal</div><div>Reference</div></div>
+            <div class="desc">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Export settings · switch rows</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p K">
+          <div class="fx" style="margin-bottom:10px"><span class="back">‹ Back</span><span style="font-size:12px;font-weight:600">Export settings</span></div>
+          <div class="card">
+            <div class="sh"><span class="st">Video</span></div>
+            <div style="color:#9d9d9d;font-size:10px;margin-bottom:5px">Length</div>
+            <div class="dd full"><span>Auto</span><span class="c">▼</span></div>
+          </div>
+          <div class="card" style="padding-top:6px;padding-bottom:6px">
+            <div class="sh" style="margin:4px 0 2px"><span class="st">Extras</span></div>
+            <div class="swrow"><span class="l">Show finished drawing first</span><div class="dd mini"><span>1 s</span><span class="c">▼</span></div><span class="sw on"><i></i></span></div>
+            <div class="swrow"><span class="l off">Flash before the final image</span><span class="sw"><i></i></span></div>
+            <div class="swrow"><span class="l">Hold final image</span><div class="dd mini"><span>3 s</span><span class="c">▼</span></div><span class="sw on"><i></i></span></div>
+            <div class="swrow"><span class="l off">Slow down at the end</span><span class="sw"><i></i></span></div>
+            <div class="swrow"><span class="l">Remove flicker</span><span class="sw on"><i></i></span></div>
+            <div class="swrow"><span class="l off">Work-time counter</span><div class="dd mini dis"><span>Bottom right</span><span class="c">▼</span></div><span class="sw"><i></i></span></div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Record · capsule pill</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p K">
+          <div class="tabs"><div class="tab on"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="card">
+            <div class="sh"><span class="st">Recording</span><span class="pc sm on"><span class="cs"><i></i></span><span class="tx">Auto record</span></span></div>
+            <div class="btn big live"><span class="ico-live"></span>Recording</div>
+            <div class="btn pri">Export video</div>
+          </div>
+          <div class="card">
+            <div class="stats">
+              <div class="stat"><div class="k">Frames</div><div class="v">4,875</div></div>
+              <div class="stat w"><div class="k">Timer</div><div class="v mono">2:34:12</div></div>
+              <div class="stat"><div class="k">On disk</div><div class="v">1.6 GB</div></div>
+            </div>
+            <div class="recbar"><span class="nm ell">griffith new.psd</span><span class="pv">Preview ▸</span></div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Export settings · capsule pill</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p K">
+          <div class="fx" style="margin-bottom:10px"><span class="back">‹ Back</span><span style="font-size:12px;font-weight:600">Export settings</span></div>
+          <div class="card">
+            <div class="sh"><span class="st">Extras</span></div>
+            <div class="optrow"><span class="pc on"><span class="cs"><i></i></span><span class="tx">Show finished drawing first</span></span><div class="dd mini"><span>1 s</span><span class="c">▼</span></div></div>
+            <div class="optrow"><span class="pc"><span class="cs"><i></i></span><span class="tx">Flash before the final image</span></span></div>
+            <div class="optrow"><span class="pc on"><span class="cs"><i></i></span><span class="tx">Hold final image</span></span><div class="dd mini"><span>3 s</span><span class="c">▼</span></div></div>
+            <div class="optrow"><span class="pc"><span class="cs"><i></i></span><span class="tx">Slow down at the end</span></span></div>
+            <div class="optrow"><span class="pc on"><span class="cs"><i></i></span><span class="tx">Remove flicker</span></span></div>
+            <div class="optrow"><span class="pc"><span class="cs"><i></i></span><span class="tx">Work-time counter</span></span><div class="dd mini dis"><span>Bottom right</span><span class="c">▼</span></div></div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Library</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p K">
+          <div class="tabs"><div class="tab"><span class="dot"></span>Record</div><div class="tab on">Library</div><div class="tab">Settings</div></div>
+          <div class="card dark">
+            <div class="lbl">RECORDINGS FOLDER</div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="fx" style="margin-top:9px"><span class="grow"><b style="font-size:15px">1.7 GB</b> <span style="color:#9d9d9d;font-size:10px">· 7 recordings</span></span><div class="btn small">Open folder</div></div>
+          </div>
+          <div class="refresh">↻ Refresh</div>
+          <div class="item"><div class="fx"><span class="grow ell inm">griffith new</span><span class="tag t-rec">REC</span><span class="tag t-ok">EXPORTED</span></div>
+            <div class="meta">4,875 frames · 1.6 GB · 2:34:12 work · recorded now</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+          <div class="item"><div class="fx"><span class="grow ell inm">365</span><span class="tag t-no">NOT EXPORTED</span></div>
+            <div class="meta">91 frames · 22 MB · 0:18:40 work · recorded 2 d ago</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+          <div class="item"><div class="fx"><span class="grow ell inm">Untitled-2</span></div>
+            <div class="meta">0 frames · 0 KB · 0:02:10 work · recorded 5 d ago</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete folder</div></div></div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Settings (unchanged from test 2)</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p K">
+          <div class="tabs"><div class="tab"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab on">Settings</div></div>
+          <div class="card"><div class="lbl">FRAMES FOLDER</div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="btn small" style="margin-top:8px;width:120px">Change folder…</div></div>
+          <div class="card"><div class="lbl">RECORDING QUALITY</div>
+            <div class="qsel"><div>Low</div><div class="on">Default</div><div>High</div></div>
+            <div class="r2"><span class="l">Remove frames with undo</span><span class="sw on"><i></i></span></div></div>
+          <div class="card"><div class="lbl">REFERENCE LAYERS</div>
+            <div class="r2" style="margin-top:0"><span class="l">Name tag</span><div class="dd"><span>[ref]</span><span class="c">▼</span></div></div></div>
+          <div class="card"><div class="lbl">WORK TIMER</div>
+            <div class="r2" style="margin-top:0"><span class="l">Idle after</span><div class="dd"><span>30 s</span><span class="c">▼</span></div></div></div>
+        </div></div></div>
+    </div>
+  </section>
+
+  <!-- ================================================================ 2 -->
+  <section class="design">
+    <h2>2 · Studio (B), round button back</h2>
+    <p class="what">
+      The round button is back next to the timer, redrawn with classic recorder symbols. <b>Not started</b> and <b>paused</b> show a red record dot in a grey ring (click to record or resume). <b>While recording</b>, the button fills with colour and shows the pause symbol (click to pause). The recording state is shown twice, once in <b>red</b> (like a camera) and once in <b>green</b>; the status text, the box outline and the tab dot follow the same colour.
+      In the Library, <b>Open folder / Delete frames</b> are centred, and Refresh is plain text above the recordings, the same as in option 1.
+    </p>
+    <div class="row">
+      <div class="shot"><div class="cap">Not started</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p B">
+          <div class="tabs"><div class="tab on"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="hero">
+            <div class="status"><span class="pip"></span>NOT RECORDING<span class="auto">Auto<span class="sw"><i></i></span></span></div>
+            <div class="clock"><div class="grow"><div class="time mono dim">0:00:00</div><div class="docrow"><span class="docn ell">tree study.psd</span></div></div>
+              <div><div class="rc idle"><div class="in"><span class="rdot"></span></div></div><div class="rcap">START</div></div></div>
+            <div class="mini"><div><div class="mk">Frames</div><div class="mv dim">–</div></div><div><div class="mk">On disk</div><div class="mv dim">–</div></div></div>
+          </div>
+          <div class="btn pri dis">Export video</div>
+          <div class="card">
+            <div class="lbl">REFERENCE LAYER</div>
+            <div class="ref"><span class="bar"></span><div class="grow"><div class="ch ell">Background sketch</div><div class="cs">Recorded</div></div></div>
+            <div class="seg"><div class="on">Normal</div><div>Reference</div></div>
+            <div class="sub">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Recording · red</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p B">
+          <div class="tabs"><div class="tab on"><span class="dot r"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="hero r">
+            <div class="status r"><span class="pip"></span>RECORDING<span class="auto">Auto<span class="sw"><i></i></span></span></div>
+            <div class="clock"><div class="grow"><div class="time mono">2:34:12</div><div class="docrow"><span class="docn ell">griffith new.psd</span><span class="pv">Preview ▸</span></div></div>
+              <div style="margin-left:10px"><div class="rc r"><div class="in"><span class="pz"></span></div></div><div class="rcap">PAUSE</div></div></div>
+            <div class="mini"><div><div class="mk">Frames</div><div class="mv">4,875</div></div><div><div class="mk">On disk</div><div class="mv">1.6 GB</div></div></div>
+          </div>
+          <div class="btn pri">Export video</div>
+          <div class="card">
+            <div class="lbl">REFERENCE LAYER</div>
+            <div class="ref"><span class="bar g"></span><div class="grow"><div class="ch ell">Sketch</div><div class="cs g">Not recorded — reference layer</div></div></div>
+            <div class="seg"><div>Normal</div><div class="on g">Reference</div></div>
+            <div class="sub">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Recording · green</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p B">
+          <div class="tabs"><div class="tab on"><span class="dot g"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="hero g">
+            <div class="status g"><span class="pip"></span>RECORDING<span class="auto">Auto<span class="sw"><i></i></span></span></div>
+            <div class="clock"><div class="grow"><div class="time mono">2:34:12</div><div class="docrow"><span class="docn ell">griffith new.psd</span><span class="pv">Preview ▸</span></div></div>
+              <div style="margin-left:10px"><div class="rc g"><div class="in"><span class="pz"></span></div></div><div class="rcap">PAUSE</div></div></div>
+            <div class="mini"><div><div class="mk">Frames</div><div class="mv">4,875</div></div><div><div class="mk">On disk</div><div class="mv">1.6 GB</div></div></div>
+          </div>
+          <div class="btn pri">Export video</div>
+          <div class="card">
+            <div class="lbl">REFERENCE LAYER</div>
+            <div class="ref"><span class="bar"></span><div class="grow"><div class="ch ell">Sketch</div><div class="cs">Recorded</div></div></div>
+            <div class="seg"><div class="on">Normal</div><div>Reference</div></div>
+            <div class="sub">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Paused</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p B">
+          <div class="tabs"><div class="tab on"><span class="dot"></span>Record</div><div class="tab">Library</div><div class="tab">Settings</div></div>
+          <div class="hero y">
+            <div class="status y"><span class="pbars"></span>PAUSED<span class="auto">Auto<span class="sw"><i></i></span></span></div>
+            <div class="clock"><div class="grow"><div class="time mono half">2:34:12</div><div class="docrow"><span class="docn ell">griffith new.psd</span><span class="pv">Preview ▸</span></div></div>
+              <div style="margin-left:10px"><div class="rc idle"><div class="in"><span class="rdot"></span></div></div><div class="rcap">RESUME</div></div></div>
+            <div class="mini"><div><div class="mk">Frames</div><div class="mv">4,875</div></div><div><div class="mk">On disk</div><div class="mv">1.6 GB</div></div></div>
+          </div>
+          <div class="btn pri">Export video</div>
+          <div class="card">
+            <div class="lbl">REFERENCE LAYER</div>
+            <div class="ref"><span class="bar"></span><div class="grow"><div class="ch ell">Sketch</div><div class="cs">Recorded</div></div></div>
+            <div class="seg"><div class="on">Normal</div><div>Reference</div></div>
+            <div class="sub">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+          </div>
+        </div></div></div>
+
+      <div class="shot"><div class="cap">Library</div><div class="frame"><div class="psbar">Timelapse Recorder</div>
+        <div class="p B">
+          <div class="tabs"><div class="tab"><span class="dot g"></span>Record</div><div class="tab on">Library</div><div class="tab">Settings</div></div>
+          <div class="hero" style="padding:11px">
+            <div class="lbl">RECORDINGS FOLDER</div>
+            <div class="path mono">C:\BILDER 2\bilder bra\colors\1 timelapse\timelapse mine</div>
+            <div class="fx" style="margin-top:9px"><span class="grow"><b style="font-size:15px">1.7 GB</b> <span style="color:#8f8f8f;font-size:10px">· 7 recordings</span></span><div class="btn small">Open folder</div></div>
+          </div>
+          <div class="refresh">↻ Refresh</div>
+          <div class="item"><div class="fx"><span class="grow ell nm">griffith new</span><span class="tag t-rec">REC</span><span class="tag t-ok">EXPORTED</span></div>
+            <div class="meta">4,875 frames · 1.6 GB · 2:34:12 work · recorded now</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+          <div class="item"><div class="fx"><span class="grow ell nm">365</span><span class="tag t-no">NOT EXPORTED</span></div>
+            <div class="meta">91 frames · 22 MB · 0:18:40 work · recorded 2 d ago</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete frames</div></div></div>
+          <div class="item"><div class="fx"><span class="grow ell nm">Untitled-2</span></div>
+            <div class="meta">0 frames · 0 KB · 0:02:10 work · recorded 5 d ago</div>
+            <div class="acts"><div class="btn small">Open folder</div><div class="btn small danger">Delete folder</div></div></div>
+        </div></div></div>
+    </div>
+  </section>
+
+  <p class="note">Same rules as before: only things Photoshop's plugin panels draw reliably. The round button is two nested circles (a ring and a filled centre), so it doesn't depend on <code>outline</code>. The small caption under it (START / PAUSE / RESUME) is optional.</p>
+</div>
+</body>
+</html>

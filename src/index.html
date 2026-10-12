@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: #2e2e2e;
+    --card: #383838;
+    --card-edge: #424242;
+    --well: #2a2a2a;          /* recessed: inputs, stat tiles */
+    --well-edge: #242424;
+    --btn: #474747;
+    --btn-hi: #525252;
+    --line: #262626;
+    --txt: #e8e8e8;
+    --txt-dim: #9d9d9d;
+    --txt-faint: #767676;
+    --accent: #3d8aff;
+    --accent-hi: #5a9cff;
+    --accent-soft: rgba(61, 138, 255, 0.16);
+    --pill: #2f6fd1;          /* a pill toggle that's on */
+    --pill-hi: #3a7be0;
+    --rec: #ff5252;
+    --live: #2f9e5c;
+    --live-hi: #38b46a;
+    --live-soft: rgba(47, 158, 92, 0.18);
+    --warn: #ffc23d;
+    --r: 8px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 0;
+    display: flex; flex-direction: column;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 11px;
+    color: var(--txt);
+    background: var(--bg);
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+  }
+  /* the tabs stay at the top; everything else scrolls in here (wheel handled in main.js) */
+  #scroller { position: absolute; top: 54px; left: 0; right: 0; bottom: 0; overflow-x: hidden; overflow-y: scroll; padding: 0 10px 16px; }
+  .hidden { display: none !important; }
+
+  /* ---------- tabs: segmented control ---------- */
+  .tabs {
+    flex: 0 0 auto; display: flex; padding: 3px; margin: 10px 10px 10px;
+    background: var(--well); border: 1px solid var(--well-edge); border-radius: 9px;
+  }
+  .tab {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 6px 0; cursor: pointer; color: var(--txt-dim); border-radius: 6px;
+    transition: background 0.12s, color 0.12s;
+  }
+  .tab:hover { color: var(--txt); }
+  .tab.on { color: var(--txt); background: var(--btn); font-weight: 600; }
+  .tabdot { width: 6px; height: 6px; border-radius: 3px; background: var(--live-hi); }
+  .tabdot.idle { background: var(--warn); }
+
+  /* ---------- cards + section headings ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--card-edge); border-radius: var(--r);
+    padding: 10px; margin-bottom: 10px;
+  }
+  .card.inset { background: var(--well); border-color: var(--well-edge); margin: 8px 0 0; }
+  .card.inset .dd-head { background: var(--card); border-color: #4a4a4a; }
+  .card.dark { background: var(--well); border-color: var(--well-edge); }
+  .card.dark .path { background: #232323; border-color: #1f1f1f; }
+  .sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; min-height: 22px; }
+  .sec-title {
+    font-size: 9.5px; letter-spacing: 1.1px; text-transform: uppercase;
+    color: var(--txt-faint); font-weight: 700;
+  }
+  .viewhead { display: flex; align-items: center; margin-bottom: 10px; }
+  .back {
+    color: var(--txt); cursor: pointer; padding: 4px 10px; font-weight: 600;
+    background: var(--btn); border-radius: 11px;
+  }
+  .back:hover { background: var(--btn-hi); }
+  .viewtitle { font-size: 12px; font-weight: 600; }
+
+  /* ---------- text bits ---------- */
+  .label { color: var(--txt-dim); margin-bottom: 5px; font-size: 10px; }
+  .field { margin-bottom: 10px; min-width: 0; }
+  .field:last-child { margin-bottom: 0; }
+  .grid2 { display: flex; }
+  .grid2 > .field { flex: 1; margin-bottom: 0; }
+  .hint { color: var(--txt-dim); line-height: 1.5; margin-top: 7px; font-size: 10px; }
+  .desc { color: var(--txt-dim); font-size: 10px; line-height: 1.45; margin: 5px 0 0; }
+  .row-gap { height: 10px; }
+  .path {
+    font-family: "SF Mono", "Consolas", monospace; font-size: 10px; color: var(--txt);
+    background: var(--well); border: 1px solid var(--well-edge); border-radius: 6px;
+    padding: 6px 8px; word-break: break-all; line-height: 1.4;
+  }
+  .path.empty { color: var(--txt-dim); font-family: inherit; }
+  .status { color: var(--warn); line-height: 1.45; font-size: 10px; margin: 0 2px 8px; }
+  .about { color: var(--txt-faint); font-size: 10px; text-align: center; margin-top: 4px; }
+
+  /* ---------- buttons (divs, so a focused button can never be re-fired by Space/Enter) ---------- */
+  .btn {
+    display: flex; align-items: center; justify-content: center;
+    padding: 7px 10px; border-radius: 7px; cursor: pointer;
+    background: var(--btn); border: 1px solid transparent; color: var(--txt);
+    font-weight: 600; transition: background 0.12s;
+  }
+  .btn:hover { background: var(--btn-hi); }
+  .btn:active { opacity: 0.85; }
+  .btn.big { padding: 11px 10px; font-size: 12px; border-radius: var(--r); }
+  .btn.mid { padding: 7px 10px; font-size: 11px; border-radius: 7px; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-hi); }
+  .btn.live { background: var(--live); color: #fff; }
+  .btn.live:hover { background: var(--live-hi); }
+  .btn.paused { background: #5b5b5b; color: #f0f0f0; }
+  .btn.paused:hover { background: #666; }
+  .btn.danger { background: #4a3434; color: #ff9f96; }
+  .btn.danger:hover { background: #5a3a3a; }
+  .btn.cancel { background: #c9423f; color: #fff; }
+  .btn.cancel:hover { background: #d8504c; }
+  .btn.small { padding: 5px 10px; font-size: 10px; font-weight: 600; border-radius: 11px; }
+  .btn.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+  .btnrow { display: flex; margin-top: 8px; }
+  .btnrow .btn { flex: 1; }
+  .ico-dot { width: 10px; height: 10px; border-radius: 5px; background: var(--rec); }
+  .ico-live { width: 10px; height: 10px; border-radius: 5px; background: #fff; transition: opacity 0.25s; }
+  .ico-live.dim { opacity: 0.35; }
+  .ico-rec { width: 9px; height: 9px; border-radius: 5px; background: #fff; }
+  .ico-pause { width: 9px; height: 10px; border-left: 3px solid currentColor; border-right: 3px solid currentColor; }
+
+  /* ---------- pill toggles (replace checkboxes) ---------- */
+  .chk {
+    display: inline-flex; align-items: center; cursor: pointer; min-width: 0; max-width: 100%;
+    padding: 4px 11px 4px 5px; border-radius: 12px;
+    background: transparent; border: 1px solid #4a4a4a; color: #a9a9a9;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+  .chk:hover { border-color: #6a6a6a; color: var(--txt); }
+  .chk .sw {
+    flex: 0 0 auto; position: relative; width: 22px; height: 12px; border-radius: 6px;
+    border: 1px solid #7a7a7a; transition: background 0.12s, border-color 0.12s;
+  }
+  .chk .sw::after {
+    content: ""; position: absolute; left: 2px; top: 2px; width: 6px; height: 6px; border-radius: 3px;
+    background: #8a8a8a; transition: left 0.12s;
+  }
+  .chk.on { background: var(--pill); border-color: var(--pill); color: #fff; }
+  .chk.on:hover { background: var(--pill-hi); border-color: var(--pill-hi); }
+  .chk.on .sw { background: #fff; border-color: #fff; }
+  .chk.on .sw::after { left: 12px; background: var(--pill); }
+  .chk .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .setrow { display: flex; align-items: center; justify-content: space-between; min-height: 28px; }
+  .setrow + .setrow, .qsel + .setrow { margin-top: 6px; }
+  .setrow .l { color: var(--txt); min-width: 0; }
+  .setrow .ctl { flex: 0 0 auto; width: 118px; margin-left: 8px; }
+  .switch { flex: 0 0 auto; position: relative; width: 26px; height: 14px; border-radius: 7px; background: #555; cursor: pointer; transition: background 0.12s; }
+  .switch::after { content: ""; position: absolute; left: 2px; top: 2px; width: 10px; height: 10px; border-radius: 5px; background: #cfcfcf; transition: left 0.12s; }
+  .switch.on { background: var(--accent); }
+  .switch.on::after { left: 14px; background: #fff; }
+  .qsel { display: flex; padding: 2px; background: var(--well); border: 1px solid var(--well-edge); border-radius: 8px; }
+  .qsel .q { flex: 1; text-align: center; padding: 5px 0; border-radius: 6px; color: var(--txt-dim); font-weight: 600; cursor: pointer; }
+  .qsel .q + .q { margin-left: 2px; }
+  .qsel .q:hover { color: var(--txt); }
+  .qsel .q.on { background: var(--accent); color: #fff; }
+  .optrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; min-height: 28px; }
+  .optrow:last-child { margin-bottom: 0; }
+  .optrow > .mini { flex: 0 0 auto; width: 88px; }
+  .optrow > div:first-child { flex: 0 1 auto; min-width: 0; }
+
+  /* ---------- dropdowns (native <select> is unreliable in UXP) + inputs ---------- */
+  .dd { position: relative; }
+  .dd-head {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--well); border: 1px solid var(--well-edge);
+    border-radius: 6px; padding: 6px 9px; cursor: pointer;
+  }
+  .dd-head:hover { border-color: #555; }
+  .dd.open .dd-head { border-color: var(--accent); }
+  .dd-head span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dd-head .caret { color: var(--txt-dim); flex: 0 0 auto; font-size: 9px; }
+  .dd-list {
+    display: none; position: absolute; left: 0; right: 0; top: calc(100% + 4px);
+    background: #444; border: 1px solid #505050; padding: 3px;
+    border-radius: 7px; z-index: 30; overflow-y: auto; max-height: 220px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  }
+  .dd.open .dd-list { display: block; }
+  .dd-item { padding: 6px 8px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 5px; }
+  .dd-item:hover { background: var(--accent); color: #fff; }
+  .dd-item.sel { color: var(--accent-hi); font-weight: 600; }
+  .dd-item.sel:hover { color: #fff; }
+  .dd.disabled { opacity: 0.4; pointer-events: none; }
+  .inline { display: flex; align-items: center; }
+  .inline .label { margin: 0; flex: 0 0 auto; font-size: 11px; color: var(--txt); }
+
+  .pathrow { display: flex; align-items: center; }
+  .pathrow .path { flex: 1; min-width: 0; }
+  .libtotal { flex: 1; min-width: 0; color: var(--txt-dim); font-size: 10px; }
+  .libtotal b { font-size: 15px; font-weight: 700; color: var(--txt); margin-right: 4px; }
+  .textbtn { display: flex; justify-content: center; padding: 4px 0; margin: -2px 0 8px; color: #cfcfcf; font-weight: 600; cursor: pointer; }
+  .textbtn:hover { color: #fff; }
+  .btnrow.centered { justify-content: center; }
+  .btnrow.centered .btn { flex: 0 0 auto; padding-left: 12px; padding-right: 12px; }
+  .pathrow .btn { flex: 0 0 auto; }
+  .center { display: flex; justify-content: center; margin-top: 4px; }
+  .center .btn { padding: 7px 24px; border-radius: 14px; }
+
+  /* ---------- record tab ---------- */
+  .stats { display: flex; }
+  .stat { flex: 1; min-width: 0; background: var(--well); border: 1px solid var(--well-edge); border-radius: 7px; padding: 7px 8px; }
+  .stat .k { color: var(--txt-faint); font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat .v { font-size: 14px; font-weight: 600; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat .v.mono { font-family: "SF Mono", "Consolas", monospace; font-size: 13px; }
+  .stat.wide { flex: 1.3; }
+  .stat .idle { color: var(--warn); margin-left: 5px; }
+  .recbar {
+    display: flex; align-items: center; margin-top: 6px; padding: 7px 9px;
+    background: var(--well); border: 1px solid var(--well-edge); border-radius: 7px;
+  }
+  .recbar .rectext { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .pvlink { flex: 0 0 auto; margin-left: 8px; color: var(--txt-dim); font-weight: 600; font-size: 10.5px; cursor: pointer; }
+  .pvlink:hover { color: var(--txt); }
+  .pvlink .arrow { font-size: 9px; margin-left: 4px; }
+  .preview {
+    height: 160px; border-radius: 7px; overflow: hidden; margin-top: 6px;
+    background: #222; border: 1px solid var(--well-edge);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .preview img { max-width: 100%; max-height: 158px; }
+  .preview .ph { color: var(--txt-dim); padding: 10px; text-align: center; line-height: 1.5; }
+
+  .exrow { display: flex; margin-top: 8px; }
+  .exrow #btnExportOpen { flex: 1; }
+  .btn.square { flex: 0 0 auto; width: 42px; padding-left: 0; padding-right: 0; }
+
+  /* ---------- spacing (margins, because Photoshop's panels ignore flex gap) ---------- */
+  .tab + .tab { margin-left: 2px; }
+  .tabdot { margin-right: 6px; }
+  .sec-head > * + * { margin-left: 8px; }
+  .viewhead > * + * { margin-left: 8px; }
+  .grid2 > * + * { margin-left: 8px; }
+  .btn > * + * { margin-left: 7px; }
+  .btnrow > * + * { margin-left: 6px; }
+  .chk .sw { margin-right: 7px; }
+  .optrow > * + * { margin-left: 8px; }
+  .dd-head .caret { margin-left: 6px; }
+  .inline .label { margin-right: 8px; }
+  .pathrow > * + * { margin-left: 6px; }
+  .stats > * + * { margin-left: 6px; }
+  .exrow > * + * { margin-left: 8px; }
+  .lib-name .tags { margin-left: 10px; }
+  .tags > * + * { margin-left: 6px; }
+
+  /* ---------- message bubble (shown under the control it's about) ---------- */
+  .bubble {
+    position: absolute; left: 10px; right: 10px; z-index: 50;
+    background: #4d4d4d; border: 1px solid #5c5c5c; border-radius: 7px; padding: 7px 9px;
+    color: var(--txt); font-size: 10.5px; line-height: 1.45; box-shadow: 0 6px 16px rgba(0,0,0,0.45); cursor: pointer;
+  }
+  .bubble-arrow {
+    position: absolute; top: -5px; width: 9px; height: 9px; background: #4d4d4d;
+    border-left: 1px solid #5c5c5c; border-top: 1px solid #5c5c5c; transform: rotate(45deg);
+  }
+
+  /* ---------- reference layer: the selected layer + Normal / Reference ---------- */
+  .layerchip {
+    display: flex; align-items: center; padding: 6px 8px;
+    background: var(--well); border: 1px solid var(--well-edge); border-radius: 7px;
+  }
+  .layerchip .thumb {
+    flex: 0 0 auto; width: 22px; height: 17px; margin-right: 8px; border-radius: 3px;
+    background: #bdbdbd; border: 1px solid #6a6a6a;
+  }
+  .layerchip .lname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .layerchip .lname.none { color: var(--txt-dim); font-weight: 400; }
+  .layerchip .lstate { flex: 0 0 auto; margin-left: 8px; font-size: 10px; color: var(--txt-dim); white-space: nowrap; }
+  .layerchip.ref { border-color: #2d5a3a; }
+  .layerchip.ref .thumb { background: #3a4a40; border: 1px dashed var(--live-hi); }
+  .layerchip.ref .lstate { color: var(--live-hi); font-weight: 600; }
+  .seg {
+    display: flex; margin-top: 7px; padding: 3px;
+    background: var(--well); border: 1px solid var(--well-edge); border-radius: 8px;
+  }
+  .seg-opt {
+    flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 0;
+    border-radius: 6px; cursor: pointer; color: var(--txt-dim); font-weight: 600;
+    transition: background 0.12s, color 0.12s;
+  }
+  .seg-opt + .seg-opt { margin-left: 2px; }
+  .seg-opt:hover { color: var(--txt); background: rgba(255,255,255,0.04); }
+  .seg-opt.on { background: var(--btn); color: var(--txt); }
+  .seg-opt.on.green { background: var(--live); color: #fff; }
+  .seg.disabled { opacity: 0.4; pointer-events: none; }
+
+  /* ---------- export ---------- */
+  .progress { height: 6px; background: var(--well); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+  .progress .bar { height: 100%; width: 0%; background: var(--accent); border-radius: 3px; transition: width 0.2s; }
+  .estimate { line-height: 1.5; }
+  .estimate .big { font-size: 13px; font-weight: 600; }
+  .estimate .note { color: var(--txt-dim); font-size: 10px; margin-top: 3px; }
+
+  /* ---------- library ---------- */
+  .lib-item { background: var(--card); border: 1px solid var(--card-edge); border-radius: var(--r); padding: 10px; margin-bottom: 8px; }
+  .lib-name { font-size: 12px; font-weight: 600; display: flex; align-items: center; }
+  .lib-name .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lib-name .tags { margin-left: auto; display: flex; flex: 0 0 auto; }
+  .lib-meta { color: var(--txt-dim); font-size: 10px; margin-top: 4px; line-height: 1.45; }
+  .tag { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 7px; letter-spacing: 0.5px; flex: 0 0 auto; }
+  .tag.rec { background: var(--live); color: #fff; }
+  .tag.done { background: #2d5a3a; color: #cdeed6; }
+  .tag.todo { background: #5f4a1c; color: #ffe2a3; }
+  .empty-state { color: var(--txt-dim); line-height: 1.55; padding: 4px 2px; }
+
+  /* ---------- confirm dialog ---------- */
+  .modal {
+    position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 100;
+    background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-box { background: var(--card); border: 1px solid var(--card-edge); border-radius: 10px; padding: 14px; width: 100%; max-width: 320px; box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
+  .modal-text { line-height: 1.5; font-size: 11px; }
+  .modal-box .btnrow { margin-top: 12px; }
+</style>
+</head>
+<body>
+  <div class="tabs">
+    <div class="tab on" data-tab="main"><span id="tabDot" class="tabdot idle"></span>Record</div>
+    <div class="tab" data-tab="library">Library</div>
+    <div class="tab" data-tab="settings">Settings</div>
+  </div>
+  <div id="scroller">
+
+  <!-- RECORD -->
+  <div id="view-main" class="view">
+    <div class="card">
+      <div class="sec-head"><span class="sec-title">Recording</span><div id="chkAuto"></div></div>
+      <div id="btnRecord" class="btn big" title=""><span id="btnRecordIcon" class="ico-dot"></span><span id="btnRecordText">Start recording</span></div>
+      <div id="recHint" class="hint hidden"></div>
+      <div class="exrow">
+        <div id="btnExportOpen" class="btn mid primary">Export video</div>
+        <div id="btnCollapse" class="btn mid square hidden" title="Hide the export results">▴</div>
+      </div>
+      <div id="exportBox" class="card inset hidden">
+        <div class="label">Length</div>
+        <div id="ddLengthQuick"></div>
+        <div id="quickEstimate" class="hint hidden"></div>
+        <div id="rowUseRemembered" class="hidden" style="margin-top: 8px">
+          <div id="chkUseRemembered"></div>
+          <div id="rememberedPath" class="desc" style="word-break: break-all"></div>
+        </div>
+        <div class="btnrow">
+          <div id="btnAdvanced" class="btn">Advanced settings</div>
+          <div id="btnConfirm" class="btn primary">Confirm</div>
+        </div>
+      </div>
+      <div id="exportResults">
+        <div id="exportProgress" class="progress hidden"><div id="exportBar" class="bar"></div></div>
+        <div id="exportStatus" class="hint hidden"></div>
+        <div id="exportActions" class="hidden">
+          <div id="chkRemember" style="margin-top: 8px"></div>
+          <div class="btnrow">
+            <div id="btnPlay" class="btn">Play video</div>
+            <div id="btnOpenOut" class="btn">Show in folder</div>
+          </div>
+        </div>
+      </div>
+      <div id="btnCancelExport" class="btn hidden" style="margin-top: 8px">Cancel export</div>
+    </div>
+
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><div class="k">Frames</div><div class="v" id="stFrames">–</div></div>
+        <div class="stat wide"><div class="k">Timer<span id="stIdle" class="idle hidden"></span></div><div class="v mono" id="stWork">–</div></div>
+        <div class="stat"><div class="k">On disk</div><div class="v" id="stDisk">–</div></div>
+      </div>
+      <div id="recbar" class="recbar"><span id="recText" class="rectext">No document open</span><span id="btnPreview" class="pvlink hidden"><span id="previewLabel">Preview</span><span id="previewArrow" class="arrow">▸</span></span></div>
+      <div id="previewBox" class="preview hidden">
+        <img id="previewImg" class="hidden">
+        <div id="previewEmpty" class="ph">No frames yet</div>
+      </div>
+    </div>
+
+    <div id="refCard" class="card">
+      <div class="sec-head"><span class="sec-title">Reference layer</span></div>
+      <div id="refChip" class="layerchip">
+        <span class="thumb"></span>
+        <span id="refLayer" class="lname none">No layer selected</span>
+        <span id="refState" class="lstate hidden"></span>
+      </div>
+      <div id="refSeg" class="seg">
+        <div id="segNormal" class="seg-opt">Normal</div>
+        <div id="segRef" class="seg-opt">Reference</div>
+      </div>
+      <div class="desc">A reference layer works like a normal layer, but won't show up in the timelapse.</div>
+    </div>
+  </div>
+
+  <!-- EXPORT SETTINGS (opened from Record) -->
+  <div id="view-export" class="view hidden">
+    <div class="viewhead"><div class="back">‹ Back</div><div class="viewtitle">Export settings</div></div>
+    <div class="card">
+      <div class="sec-head"><span class="sec-title">Video</span></div>
+      <div class="field"><div class="label">Length</div><div id="ddLength"></div></div>
+      <div class="grid2">
+        <div class="field"><div class="label">Make video with</div><div id="ddEncoder"></div></div>
+        <div class="field"><div class="label">Bars colour</div><div id="ddLetterbox"></div></div>
+      </div>
+      <div class="desc">Bars fill the empty space when the canvas size changed during recording.</div>
+    </div>
+    <div class="card">
+      <div class="sec-head"><span class="sec-title">Extras</span></div>
+      <div class="optrow"><div id="chkIntro"></div><div id="ddIntro" class="mini"></div></div>
+      <div class="optrow"><div id="chkFlash"></div></div>
+      <div class="optrow"><div id="chkHold"></div><div id="ddHold" class="mini"></div></div>
+      <div class="optrow"><div id="chkSlow"></div></div>
+      <div class="optrow"><div id="chkDeflicker"></div></div>
+      <div class="optrow"><div id="chkTimer"></div><div id="ddCorner" class="mini"></div></div>
+    </div>
+    <div class="card">
+      <div class="sec-head"><span class="sec-title">Result</span></div>
+      <div id="estimate" class="estimate"></div>
+    </div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div id="view-library" class="view hidden">
+    <div class="card dark">
+      <div class="sec-head"><span class="sec-title">Recordings folder</span></div>
+      <div id="libRoot" class="path"></div>
+      <div class="pathrow" style="margin-top: 9px">
+        <div id="libTotal" class="libtotal"></div>
+        <div id="btnOpenRoot" class="btn small">Open folder</div>
+      </div>
+    </div>
+    <div id="btnRefresh" class="textbtn">↻ Refresh</div>
+    <div id="libList"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="view-settings" class="view hidden">
+    <div class="card">
+      <div class="sec-head"><span class="sec-title">Frames folder</span></div>
+      <div id="setRoot" class="path"></div>
+      <div class="desc">Where the recorded frames are kept. Videos are saved wherever you choose when you export.</div>
+      <div style="display: flex; margin-top: 8px"><div id="btnChooseRoot" class="btn small">Choose folder…</div></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><span class="sec-title">Recording quality</span></div>
+      <div id="segQuality"></div>
+      <div id="qualityDesc" class="desc"></div>
+      <div id="swUndo" style="margin-top: 6px"></div>
+      <div class="desc">Undoing something removes those recorded frames.</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><span class="sec-title">Reference layers</span></div>
+      <div class="setrow"><span class="l">Name tag</span><div id="ddTag" class="ctl"></div></div>
+      <div class="desc">Layers with this in their name are left out of the timelapse.</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><span class="sec-title">Work timer</span></div>
+      <div class="setrow"><span class="l">Idle after</span><div id="ddIdle" class="ctl"></div></div>
+      <div class="desc">The timer stops counting after this long without activity.</div>
+    </div>
+
+    <div class="about">Timelapse Recorder <span id="version"></span></div>
+  </div>
+
+    <div id="bubble" class="bubble hidden"><span class="bubble-arrow"></span><span id="bubbleText"></span></div>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <div id="modalText" class="modal-text"></div>
+      <div class="btnrow">
+        <div id="modalCancel" class="btn">Cancel</div>
+        <div id="modalOk" class="btn danger">OK</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

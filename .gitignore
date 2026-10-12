@@ -1,0 +1,7 @@
+ffmpeg/
+node_modules/
+*.ccx
+dist/
+build/
+__pycache__/
+.claude/
